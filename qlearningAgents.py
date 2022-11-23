@@ -108,18 +108,14 @@ class QLearningAgent(ReinforcementAgent):
         action = ""
 
         if self.computeActionFromQValues(state) is None:
-            print(f'decided explore for no action in Q')
             action = self.actionExplore(state)
 
         elif util.flipCoin(self.epsilon):
-            print(f'decided explore')
             action = self.actionExplore(state)
 
         else:
-            print(f'decided exploit')
             action = self.actionExploit(state)
 
-        print(f'action is {action}')
         return action
 
     def actionExplore(self, state):

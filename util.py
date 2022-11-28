@@ -15,7 +15,7 @@
 import sys
 import inspect
 import heapq, random
-
+from datetime import datetime
 
 class FixedRandom:
     def __init__(self):
@@ -550,6 +550,9 @@ def matrixAsList( matrix, value = True ):
             if matrix[row][col] == value:
                 cells.append( ( row, col ) )
     return cells
+
+def time_now():
+    return str(datetime.now()).replace(" ", "_")
 
 def lookup(name, namespace):
     """

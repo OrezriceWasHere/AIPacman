@@ -48,6 +48,7 @@ from util import manhattanDistance
 import util, layout
 import sys, types, time, random, os
 from qlearningAgents import PacmanQAgent
+import matplotlib.pyplot as plt
 ###################################################
 # YOUR INTERFACE TO THE PACMAN WORLD: A GameState #
 ###################################################
@@ -628,6 +629,8 @@ def runGames( layout, pacman, ghosts, display, numGames, record, numTraining = 0
 
     rules = ClassicGameRules(timeout)
     games = []
+    all_rewards = []
+    parameters_description = str(pacman)
 
     for i in range( numGames ):
         beQuiet = i < numTraining
@@ -642,6 +645,8 @@ def runGames( layout, pacman, ghosts, display, numGames, record, numTraining = 0
         game = rules.newGame( layout, pacman, ghosts, gameDisplay, beQuiet, catchExceptions)
         game.run()
         if not beQuiet: games.append(game)
+
+        all_rewards.append(game.state.getScore())
 
         if record:
             import time, cPickle
@@ -659,7 +664,35 @@ def runGames( layout, pacman, ghosts, display, numGames, record, numTraining = 0
         print('Win Rate:      %d/%d (%.2f)' % (wins.count(True), len(wins), winRate))
         print('Record:       ', ', '.join([ ['Loss', 'Win'][int(w)] for w in wins]))
 
+        displayResults(all_rewards, parameters_description)
+
     return games
+
+
+def displayResults(all_rewards, parameters_description):
+    N = len(all_rewards)
+    FLOATING_AVERAGE_COUNT = 50
+
+    sum_rewards_so_far = [
+        sum(all_rewards[0:limit])
+        for limit in range(N)
+    ]
+    plt.clf()
+    plt.plot(list(range(len(sum_rewards_so_far))), sum_rewards_so_far)
+    plt.title("Accumulated reward at time t")
+    plt.suptitle(parameters_description)
+    plt.savefig(f'images/{util.time_now()}.png')
+
+    floating_averages = [
+        sum(all_rewards[starting_point: starting_point + FLOATING_AVERAGE_COUNT]) / FLOATING_AVERAGE_COUNT
+        for starting_point in range(N - FLOATING_AVERAGE_COUNT)
+    ]
+    start_index, end_index = FLOATING_AVERAGE_COUNT, len(floating_averages) + FLOATING_AVERAGE_COUNT
+    plt.clf()
+    plt.plot(list(range(start_index, end_index)), floating_averages)
+    plt.title(f"Floating average of last {FLOATING_AVERAGE_COUNT} games")
+    plt.suptitle(parameters_description)
+    plt.savefig(f'images/{util.time_now()}.png')
 
 if __name__ == '__main__':
     """

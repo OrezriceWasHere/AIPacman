@@ -12,13 +12,9 @@
 # Pieter Abbeel (pabbeel@cs.berkeley.edu).
 
 
-from game import *
 from learningAgents import ReinforcementAgent
-from featureExtractors import *
-import numpy as np
-from collections import defaultdict
+import random, util
 
-import random,util,math
 
 DEFAULT_VALUE = 0.0
 DEFAULT_ACTION = None
@@ -71,7 +67,10 @@ class QLearningAgent(ReinforcementAgent):
         """
         if state not in self.Q or not self.Q[state]:
             return DEFAULT_VALUE
-        return max(self.Q[state].values())
+        possible_actions = self.getLegalActions(state)
+        possible_values = [self.Q[state][action] if action in self.Q[state] else DEFAULT_VALUE
+                           for action in possible_actions]
+        return max(possible_values)
 
 
     def computeActionFromQValues(self, state):
@@ -80,8 +79,6 @@ class QLearningAgent(ReinforcementAgent):
           are no legal actions, which is the case at the terminal state,
           you should return None.
         """
-        possible_actions = []
-
         if state not in self.Q or not self.Q[state]:
             possible_actions = self.getLegalActions(state)
 
@@ -145,9 +142,9 @@ class QLearningAgent(ReinforcementAgent):
         if state not in self.Q:
             self.Q[state] = {}
         if action not in self.Q[state]:
-            self.Q[state][action] = 0.0
+            self.Q[state][action] = DEFAULT_VALUE
         current_q = self.Q[state][action]
-        dq = self.alpha * (reward + self.gamma * self.computeValueFromQValues(nextState)
+        dq = self.alpha * (reward + (self.gamma * self.computeValueFromQValues(nextState))
                            - current_q)
         self.Q[state][action] = current_q + dq
 

@@ -80,13 +80,19 @@ class QLearningAgent(ReinforcementAgent):
           are no legal actions, which is the case at the terminal state,
           you should return None.
         """
-        if state not in self.Q or not self.Q[state]:
-            return DEFAULT_ACTION
+        possible_actions = []
 
-        max_value = self.computeValueFromQValues(state)
-        possible_actions = [action
-                            for action in self.Q[state]
-                            if self.Q[state][action] == max_value]
+        if state not in self.Q or not self.Q[state]:
+            possible_actions = self.getLegalActions(state)
+
+        else:
+            max_value = self.computeValueFromQValues(state)
+            possible_actions = [action
+                                for action in self.Q[state]
+                                if self.Q[state][action] == max_value]
+
+        if not possible_actions:
+            return DEFAULT_ACTION
 
         return random.choice(possible_actions)
 
@@ -120,6 +126,8 @@ class QLearningAgent(ReinforcementAgent):
 
     def actionExplore(self, state):
         actions = self.getLegalActions(state)
+        if not actions:
+            return None
         return random.choice(actions)
 
     def actionExploit(self, state):
@@ -139,7 +147,8 @@ class QLearningAgent(ReinforcementAgent):
         if action not in self.Q[state]:
             self.Q[state][action] = 0.0
         current_q = self.Q[state][action]
-        dq = self.alpha * (reward + self.gamma*(self.computeValueFromQValues(nextState)) - current_q)
+        dq = self.alpha * (reward + self.gamma * self.computeValueFromQValues(nextState)
+                           - current_q)
         self.Q[state][action] = current_q + dq
 
     def getPolicy(self, state):
@@ -178,3 +187,8 @@ class PacmanQAgent(QLearningAgent):
         action = QLearningAgent.getAction(self, state)
         self.doAction(state, action)
         return action
+
+    def __str__(self):
+        return str({"epsilon": self.epsilon,
+                    "gamma": self.gamma,
+                    "alpha": self.alpha})
